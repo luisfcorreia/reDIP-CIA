@@ -24,7 +24,7 @@ SRC = $(PKG) $(MOD)
 all: $(TOP).bin
 
 lint:
-	verilator --lint-only -Icells_sim -Wall -Wno-VARHIDDEN -Wno-CASEINCOMPLETE -Wpedantic +systemverilogext+sv $(FLG) $(PKG) $(TOP).sv --top $(TOP)
+	verilator --lint-only -Icells_sim -Wall -Wno-VARHIDDEN -Wno-CASEINCOMPLETE -Wno-PROCASSINIT -Wpedantic +systemverilogext+sv $(FLG) $(PKG) $(TOP).sv --top $(TOP)
 
 lint-slang:
 	slang --lint-only -y. -ycells_sim -Wconversion -Wextra -Wparentheses -Wpedantic -Wunused -Wno-implicit-net-port -Wno-unconnected-port -Wno-useless-cast $(FLG) $(PKG) $(TOP).sv -top $(TOP)
@@ -48,8 +48,8 @@ SIM_OPTS = -DTOD_PHI20_NODELAY -DTOD_INT_NODELAY
 endif
 
 sim:
-	verilator --Mdir sim_trace $(SIM_OPTS) -DVM_TRACE -Wno-CASEINCOMPLETE --timescale "1us/1ns" --trace-fst --trace-structs --trace-underscore --clk clk --cc -O3 -CFLAGS "--std=c++20 -Wall" --x-assign fast --x-initial 0 --noassert --exe --build -Icells_sim cia_pkg.sv cia_core.sv --top cia_core cia_core_sim.cpp -o cia_sim
-	verilator --Mdir sim_log $(SIM_OPTS) -Wno-CASEINCOMPLETE --clk clk --cc -O3 -CFLAGS "--std=c++20 -Wall" --x-assign fast --x-initial 0 --noassert --exe --build -Icells_sim cia_pkg.sv cia_core.sv --top cia_core cia_core_sim.cpp -o cia_sim
+	verilator --Mdir sim_trace $(SIM_OPTS) -DVM_TRACE -Wno-CASEINCOMPLETE --timescale "1us/1ns" --trace-fst --trace-structs --trace-underscore --cc -O3 -CFLAGS "--std=c++20 -Wall" --x-assign fast --x-initial 0 --noassert --exe --build -Icells_sim cia_pkg.sv cia_core.sv --top cia_core cia_core_sim.cpp -o cia_sim
+	verilator --Mdir sim_log $(SIM_OPTS) -Wno-CASEINCOMPLETE --cc -O3 -CFLAGS "--std=c++20 -Wall" --x-assign fast --x-initial 0 --noassert --exe --build -Icells_sim cia_pkg.sv cia_core.sv --top cia_core cia_core_sim.cpp -o cia_sim
 
 clean:
 	rm -rf $(TOP).json $(TOP).asc $(TOP).bin sim_trace sim_log

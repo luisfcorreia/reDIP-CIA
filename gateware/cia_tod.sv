@@ -91,7 +91,6 @@ module cia_tod (
     // Logic for hour 12 -> 01.
     cia::reg4_t cnext_tod_hr_hl_9;
     cia::reg4_t cnext_tod_hr_hl_2;
-    logic       cnext_tod_hr_hh;
     logic       h12;
     logic       h12_next;
 
@@ -151,6 +150,7 @@ module cia_tod (
     bcd_update #(5)    mh_update   (we_min,   data[6:4], clock.tod_min.mh,  ml_c,   cnext.tod_min.mh,  mh_c  );
     bcd_update #(9)    hl_update_9 (we_hr ,   data[3:0], clock.tod_hr.hl,   mh_c,   cnext_tod_hr_hl_9, hl_9_c);
     bcd_update #(2, 4) hl_update_2 (we_hr ,   data[3:0], clock.tod_hr.hl,   mh_c,   cnext_tod_hr_hl_2, hl_2_c);
+
     always_comb begin
         // 09:59:59.9 -> 10:00:00.0
         // 12:59:59.9 -> 01:00:00.0
@@ -158,11 +158,8 @@ module cia_tod (
         { cnext.tod_hr.hl, hl_c } = clock.tod_hr.hh ?
                                     { cnext_tod_hr_hl_2 | { 3'b0, hl_2_c }, hl_2_c } :
                                     { cnext_tod_hr_hl_9,                    hl_9_c };
-    end
-    bcd_update #(1)    hh_update   (we_hr,    data[4],   clock.tod_hr.hh,   hl_c,   cnext_tod_hr_hh,   hh_c  );
 
-    always_comb begin
-        cnext.tod_hr.hh = cnext_tod_hr_hh;
+        cnext.tod_hr.hh = we_hr ? data[4] : clock.tod_hr.hh + hl_c;
 
         // Flip PM bit when clock reaches 12:00:00.0.
         // CIA bug: Writing "PM 1 2" inverts the written PM bit.
