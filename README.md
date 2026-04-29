@@ -33,7 +33,7 @@ A separate header footprint is provided for (Q)SPI flash programming, with pinou
 
 The board is fully pin compatible with the venerable MOS 6526/8521 CIA chips.
 
-Cycle accurate emulation of the MOS 8521 chip has been implemented in [gateware](gateware/).
+Cycle accurate emulation of the MOS 6526/8521 CIA chips has been implemented in [gateware](gateware/).
 
 ## Thanks
 

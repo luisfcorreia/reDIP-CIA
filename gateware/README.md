@@ -9,8 +9,7 @@ The gateware implementation is based on the [excellent schematics](http://forum.
 of the MOS 8521 chip provided by Frank "androSID" Wolf and Dieter "ttlworks" Müller.
 
 By default, the MOS 8521 chip is emulated. The gateware also implements MOS
-6526 emulation; this can be built via `make MOS6526=1`. Note however that the
-6526 emulation is not yet accurate.
+6526 emulation; this can be built via `make MOS6526=1`.
 
 ## Installation
 
