@@ -12,7 +12,8 @@ typedef enum {
 void timer_init(void);
 void timer_tick(bool phi2_dn, bool cnt, bool cnt_up, bool ta_int,
                 uint8_t cra, uint8_t talo, uint8_t tahi,
-                uint8_t crb, uint8_t tblo, uint8_t tbhi);
+                uint8_t crb, uint8_t tblo, uint8_t tbhi,
+                bool cra_w_prev, bool crb_w_prev);
 void timer_set_lo(timer_id_t id, uint8_t val);
 void timer_set_hi(timer_id_t id, uint8_t val);
 void timer_set_ctrl(timer_id_t id, uint8_t ctrl);

@@ -1,5 +1,6 @@
 #include "tod.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 static uint8_t tod_10ths = 0;
 static uint8_t tod_sec = 0;
@@ -19,6 +20,10 @@ static bool latched = false;
 
 static bool alarm_enabled = false;
 static bool alarm_flag = false;
+
+static uint8_t jc2 = 0;
+static bool phi20 = false;
+static bool phi20_prev = false;
 
 static uint8_t bcd_inc(uint8_t val, uint8_t max) {
     uint8_t hi = (val >> 4) & 0x0F;
@@ -83,8 +88,15 @@ void tod_write(uint8_t addr, uint8_t val) {
     }
 }
 
-void tod_tick(bool phi2_edge, bool write_strobe, uint8_t addr, uint8_t data, uint8_t *data_out) {
-    if (phi2_edge) {
+void tod_tick(bool phi2_up, bool phi2_dn, bool write_strobe, uint8_t addr, uint8_t data, uint8_t *data_out) {
+    if (phi2_dn) {
+        jc2 = ((jc2 & 1) << 1) | ((~jc2) & 1);
+    }
+
+    phi20_prev = phi20;
+    phi20 = (jc2 == 0) && phi2_dn;
+
+    if (phi20 && !phi20_prev) {
         tod_10ths++;
         if (tod_10ths > 9) {
             tod_10ths = 0;

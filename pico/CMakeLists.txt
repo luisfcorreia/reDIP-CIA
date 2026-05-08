@@ -36,6 +36,10 @@ pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/bus_capture
 pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/bus_output.pio)
 pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/ports.pio)
 pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/timer_pio.pio)
+pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/phi2_edges.pio)
+pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/flag_edges.pio)
+pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/cnt_edges.pio)
+pico_generate_pio_header(redip_cia ${CMAKE_CURRENT_LIST_DIR}/src/pio/rs_edges.pio)
 
 target_link_libraries(redip_cia
     pico_stdlib

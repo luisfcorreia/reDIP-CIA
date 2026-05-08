@@ -1,0 +1,40 @@
+; RS Edge Detection PIO
+; Detects changes in register select lines RS0-3
+; Output: 4 bits to FIFO (new RS value)
+
+.program rs_edges
+
+    ; Initialize: read initial RS value
+    in pins, 4              ; Sample RS0-3
+    mov x, isr             ; Save to X
+    push noblock
+
+rs_loop:
+    in pins, 4              ; Sample RS0-3
+    mov y, isr             ; Copy to Y
+    jmp x!=y, changed      ; If changed, push
+    mov x, y               ; X = Y (no change)
+    jmp rs_loop
+
+changed:
+    mov x, y               ; Update X
+    push noblock           ; Push new value
+    jmp rs_loop
+
+% c-sdk {
+#include "hardware/gpio.h"
+#include "rs_edges.pio.h"
+
+void rs_edges_program_init(PIO pio, uint sm, uint offset) {
+    for (int i = 16; i <= 19; i++) {
+        gpio_init(i);
+        gpio_set_dir(i, GPIO_IN);
+    }
+
+    pio_sm_config c = rs_edges_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, 16);
+    sm_config_set_in_shift(&c, true, true, 4);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

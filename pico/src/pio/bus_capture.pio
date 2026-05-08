@@ -4,10 +4,9 @@
 .program bus_capture
 
 capture_loop:
-    wait 0 gpio 16          ; Wait PHI2 high
-    wait 1 gpio 16          ; Wait PHI2 rising edge
-    wait 0 gpio 16          ; Wait PHI2 falling edge
-    in pins, 8              ; Sample DATA0-7
+    wait 0 gpio 16          ; Wait PHI2 low
+    wait 1 gpio 16          ; Wait PHI2 rising edge (data stable here)
+    in pins, 8              ; Sample DATA0-7 on rising edge
     push noblock
     jmp capture_loop
 

@@ -1,0 +1,26 @@
+; FLAG Edge Detection PIO
+; Detects falling edge of /FLAG input
+; Output: 1 bit to FIFO (0=falling edge detected)
+
+.program flag_edges
+
+flag_loop:
+    wait 1 gpio 33          ; Wait FLAG high
+    wait 0 gpio 33          ; Wait FLAG falling edge
+    set x, 0                ; Push 0 for falling edge
+    push noblock
+    jmp flag_loop
+
+% c-sdk {
+#include "hardware/gpio.h"
+#include "flag_edges.pio.h"
+
+void flag_edges_program_init(PIO pio, uint sm, uint offset) {
+    gpio_init(33);
+    gpio_set_dir(33, GPIO_IN);
+
+    pio_sm_config c = flag_edges_program_get_default_config(offset);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

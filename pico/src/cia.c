@@ -13,8 +13,16 @@ static cia_outputs_t outputs;
 static uint8_t prev_phi2 = 0;
 static uint8_t phi2_up = 0;
 static uint8_t phi2_dn = 0;
-static bool cnt_prev = false;
 static bool ta_int_pending = false;
+
+static uint8_t icr_flags = 0;
+static uint8_t icr_mask = 0;
+static uint8_t icr7 = 0;
+static bool irq = false;
+static bool irq_prev = false;
+
+static bool cra_w_prev = false;
+static bool crb_w_prev = false;
 
 void cia_init(void) {
     memset(&regs, 0, sizeof(regs));
@@ -59,11 +67,8 @@ void cia_tick(uint8_t phi2, uint8_t cs_n, uint8_t rw_n, uint8_t addr, uint8_t da
         inputs.pb_in = inputs_in->pb_in;
     }
 
-    if (phi2_dn && !cs_n) {
-        if (rw_n) {
-        } else {
-            cia_write(addr, data_in);
-        }
+    if (phi2_dn && !cs_n && !rw_n) {
+        cia_write(addr, data_in);
     }
 
     if (phi2 && !cs_n && rw_n) {
@@ -76,13 +81,20 @@ void cia_tick(uint8_t phi2, uint8_t cs_n, uint8_t rw_n, uint8_t addr, uint8_t da
     uint8_t cra = regs.cra;
     uint8_t crb = regs.crb;
 
-    bool cnt_up = inputs_in->cnt && !cnt_prev;
-    cnt_prev = inputs_in->cnt;
+    bool cnt_up = inputs_in->cnt_rise;
 
-    timer_tick(phi2_dn, inputs_in->cnt, cnt_up, ta_int_pending, cra, regs.talo, regs.tahi, crb, regs.tblo, regs.tbhi);
+    bool cra_w = !cs_n && !rw_n && (addr == CIA_REG_CRA);
+    bool crb_w = !cs_n && !rw_n && (addr == CIA_REG_CRB);
+
+    timer_tick(phi2_dn, inputs_in->cnt, cnt_up, ta_int_pending, cra, regs.talo, regs.tahi, crb, regs.tblo, regs.tbhi, cra_w_prev, crb_w_prev);
 
     if (phi2_dn) {
-        tod_tick(true, false, 0, 0, NULL);
+        cra_w_prev = cra_w;
+        crb_w_prev = crb_w;
+    }
+
+    if (phi2_dn) {
+        tod_tick(phi2_up, phi2_dn, false, 0, 0, NULL);
     }
 
     uint8_t timer_irq;
@@ -98,9 +110,13 @@ void cia_tick(uint8_t phi2, uint8_t cs_n, uint8_t rw_n, uint8_t addr, uint8_t da
         serial_set_ctrl(cra);
     }
 
-    if (phi2_dn && !cs_n && rw_n && addr == CIA_REG_ICR) {
-        if (regs.icr & 0x01) ta_int_pending = false;
-        if (regs.icr & 0x02) { /* tod alarm clear */ }
+    bool r_icr = !cs_n && rw_n && (addr == CIA_REG_ICR);
+    bool w_icr = !cs_n && !rw_n && (addr == CIA_REG_ICR);
+
+    if (r_icr) {
+        icr7 = 0;
+        irq = false;
+        icr_flags = 0;
     }
 
     uint8_t int_src = 0;
@@ -108,18 +124,38 @@ void cia_tick(uint8_t phi2, uint8_t cs_n, uint8_t rw_n, uint8_t addr, uint8_t da
     serial_check_irq(&serial_irq);
     flag_irq = inputs_in->flag_edge;
     tod_irq = tod_alarm_match();
-    if (timer_irq || serial_irq || flag_irq || tod_irq) {
-        regs.icr |= 0x80;
-        int_src |= (timer_irq ? 0x01 : 0);
-        int_src |= (serial_irq ? 0x08 : 0);
-        int_src |= (flag_irq ? 0x04 : 0);
-        int_src |= (tod_irq ? 0x02 : 0);
+
+    uint8_t sources = 0;
+    sources |= (timer_irq ? 0x01 : 0);
+    sources |= (tod_irq ? 0x02 : 0);
+    sources |= (flag_irq ? 0x04 : 0);
+    sources |= (serial_irq ? 0x08 : 0);
+
+    for (int i = 0; i < 5; i++) {
+        if (sources & (1 << i)) {
+            icr_flags |= (1 << i);
+        } else if (r_icr) {
+            icr_flags &= ~(1 << i);
+        }
     }
-    if (regs.icr & 0x80) {
-        outputs.irq_n = 0;
-    } else {
-        outputs.irq_n = 1;
+
+    if (w_icr) {
+        icr_mask = data_in & 0x1F;
     }
+
+    bool ir_set = (icr_flags & icr_mask) != 0;
+
+    bool ir_clr = r_icr;
+
+    if (ir_set && !ir_clr) {
+        icr7 = 1;
+        irq = true;
+    } else if (ir_clr && !ir_set) {
+        icr7 = 0;
+        irq = false;
+    }
+
+    outputs.irq_n = irq ? 0 : 1;
 
     outputs.pa_out = compute_pra();
     outputs.pb_out = compute_prb();
@@ -146,7 +182,7 @@ uint8_t cia_read(uint8_t addr) {
         case 0x08: case 0x09: case 0x0A: case 0x0B:
             return tod_read(addr);
         case CIA_REG_SDR: return serial_get_data();
-        case CIA_REG_ICR: return regs.icr;
+        case CIA_REG_ICR: return (icr7 << 7) | icr_flags;
         case CIA_REG_CRA: return regs.cra;
         case CIA_REG_CRB: return regs.crb;
         default: return 0xFF;

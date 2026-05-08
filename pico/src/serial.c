@@ -75,7 +75,6 @@ uint8_t serial_get_data(void) {
 void serial_tick(bool phi2_up, bool phi2_dn, bool we_sdr, uint8_t data, bool ta_int, bool cnt_up, bool sp_in, bool res) {
     bool rx_clk, tx_clk;
     bool tx_sp_next;
-    bool tx_cnt;
 
     rx_clk = !txmode && cnt_up;
     tx_clk = txmode && (!tx_osc_out_prev && tx_osc_out);
@@ -101,8 +100,6 @@ void serial_tick(bool phi2_up, bool phi2_dn, bool we_sdr, uint8_t data, bool ta_
     } else {
         tx_active = tx_active_prev;
     }
-
-    cnt_out_local = (tx_cnt || !txmode) ? 1 : 0;
 
     we_sdr_prev = we_sdr;
     txmode_prev = txmode;

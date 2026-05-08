@@ -53,18 +53,21 @@ uint8_t timer_get_hi(timer_id_t id) {
 
 void timer_tick(bool phi2_dn, bool cnt, bool cnt_up, bool ta_int,
                 uint8_t cra, uint8_t talo, uint8_t tahi,
-                uint8_t crb, uint8_t tblo, uint8_t tbhi) {
+                uint8_t crb, uint8_t tblo, uint8_t tbhi,
+                bool cra_w_prev, bool crb_w_prev) {
     if (!phi2_dn) return;
 
     timer_state_t *ta = &timer_a;
     timer_state_t *tb = &timer_b;
 
-    uint8_t force_load_a = (cra >> 2) & 1;
+    uint8_t load_a = (cra >> 2) & 1;
+    uint8_t force_load_a = load_a & cra_w_prev;
     uint8_t start_a = (cra >> 0) & 1;
     uint8_t count_mode_a = (cra >> 4) & 1;
     uint8_t toggle_a = (cra >> 1) & 1;
 
-    uint8_t force_load_b = (crb >> 2) & 1;
+    uint8_t load_b = (crb >> 2) & 1;
+    uint8_t force_load_b = load_b & crb_w_prev;
     uint8_t start_b = (crb >> 0) & 1;
     uint8_t count_mode_b = (crb >> 4) & 1;
     uint8_t toggle_b = (crb >> 1) & 1;

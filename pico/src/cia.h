@@ -53,6 +53,8 @@ typedef struct {
     uint8_t flag_n;
     uint8_t flag_edge;
     uint8_t cnt;
+    uint8_t cnt_rise;
+    uint8_t cnt_fall;
     uint8_t tod;
     uint8_t sp;
 } cia_inputs_t;
