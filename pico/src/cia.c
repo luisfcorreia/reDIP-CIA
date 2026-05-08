@@ -94,7 +94,7 @@ void cia_tick(uint8_t phi2, uint8_t cs_n, uint8_t rw_n, uint8_t addr, uint8_t da
     }
 
     if (phi2_dn) {
-        tod_tick(phi2_up, phi2_dn, false, 0, 0, NULL);
+        tod_tick(phi2, phi2_up, phi2_dn, false, 0, 0, NULL);
     }
 
     uint8_t timer_irq;
