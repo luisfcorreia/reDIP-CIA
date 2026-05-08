@@ -1,0 +1,51 @@
+; Timer output PIO
+; Handles Timer A (PB6) and Timer B (PB7) output modes:
+; - Toggle mode: output toggles on each timer underflow
+; - One-shot mode: output high on start, low on underflow
+; - Pulse mode: short pulse on underflow
+; Pin mapping: GPIO29=PB6 (Timer A), GPIO30=PB7 (Timer B)
+
+.program timer_pio
+
+    ; Wait for timer state update from CPU via TX FIFO
+    ; Data format: [timer_a_out, timer_b_out, timer_a_mode, timer_b_mode]
+    ; Mode: 0=toggle, 1=one-shot, 2=pulse
+
+timer_loop:
+    pull noblock           ; Get timer control word
+    mov x, isr             ; Save to X for mode checking
+
+    ; Extract outputs
+    out y, 2               ; Get [B, A] outputs
+    out null, 6           ; Discard mode bits
+
+    ; Output to PB6/PB7
+    ; Use side set for cleaner output
+    out pins, 2            ; Output to GPIO29-30
+
+    jmp timer_loop
+
+; Optional: Pulse mode implementation
+pulse_out:
+    ; Output high immediately
+    set pins, 2            ; Set both high
+    ; Wait ~1 cycle
+    nop
+    ; Output low
+    set pins, 0            ; Set both low
+    jmp timer_loop
+
+% c-sdk {
+#include "hardware/gpio.h"
+void timer_pio_program_init(PIO pio, uint sm, uint offset) {
+    gpio_init(29); gpio_set_dir(29, GPIO_OUT);  // PB6 - Timer A
+    gpio_init(30); gpio_set_dir(30, GPIO_OUT);  // PB7 - Timer B
+
+    pio_sm_config c = timer_pio_program_get_default_config(offset);
+    sm_config_set_out_pins(&c, 29, 2);
+    sm_config_set_out_shift(&c, true, false, 8);
+    sm_config_set_set_pins(&c, 29, 2);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

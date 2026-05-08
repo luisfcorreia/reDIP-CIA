@@ -1,0 +1,33 @@
+; CIA Bus Data Capture PIO
+; SM0: Capture DATA on falling edge of PHI2 → RX FIFO
+
+.program bus_capture
+
+capture_loop:
+    wait 0 gpio 16          ; Wait PHI2 high
+    wait 1 gpio 16          ; Wait PHI2 rising edge
+    wait 0 gpio 16          ; Wait PHI2 falling edge
+    in pins, 8              ; Sample DATA0-7
+    push noblock
+    jmp capture_loop
+
+% c-sdk {
+#include "hardware/gpio.h"
+#include "bus_capture.pio.h"
+
+void bus_capture_program_init(PIO pio, uint sm, uint offset) {
+    for (int i = 0; i < 8; i++) {
+        gpio_init(i);
+        gpio_set_dir(i, GPIO_IN);
+    }
+    gpio_init(PHI2_PIN);
+    gpio_set_dir(PHI2_PIN, GPIO_IN);
+
+    pio_sm_config c = bus_capture_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, 0);
+    sm_config_set_in_shift(&c, true, true, 8);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
