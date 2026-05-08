@@ -5,14 +5,14 @@
 .program phi2_edges
 
 phi2_loop:
-    wait 0 gpio 16          ; Wait PHI2 low
-    wait 1 gpio 16          ; Wait PHI2 rising edge
+    wait 0 gpio 26          ; Wait PHI2 low
+    wait 1 gpio 26          ; Wait PHI2 rising edge
     set x, 1                ; Push 1 for rising edge
     push noblock
 
 phi2_fall:
-    wait 1 gpio 16          ; Wait PHI2 high
-    wait 0 gpio 16          ; Wait PHI2 falling edge
+    wait 1 gpio 26          ; Wait PHI2 high
+    wait 0 gpio 26          ; Wait PHI2 falling edge
     set x, 0                ; Push 0 for falling edge
     push noblock
     jmp phi2_loop
@@ -22,8 +22,8 @@ phi2_fall:
 #include "phi2_edges.pio.h"
 
 void phi2_edges_program_init(PIO pio, uint sm, uint offset) {
-    gpio_init(16);
-    gpio_set_dir(16, GPIO_IN);
+    gpio_init(26);
+    gpio_set_dir(26, GPIO_IN);
 
     pio_sm_config c = phi2_edges_program_get_default_config(offset);
     pio_sm_init(pio, sm, offset, &c);

@@ -6,14 +6,14 @@
 
 loop:
     ; Phase 1: Sample PA on PHI2 rising edge
-    wait 0 gpio 0
-    wait 1 gpio 0
+    wait 0 gpio 26
+    wait 1 gpio 26
     in pins, 8            ; Sample PA[7:0]
     push noblock
 
     ; Phase 2: Sample PB on next PHI2 rising edge
-    wait 0 gpio 0
-    wait 1 gpio 0
+    wait 0 gpio 26
+    wait 1 gpio 26
     in pins, 8            ; Sample PB[7:0]
     push noblock
 
@@ -22,15 +22,15 @@ loop:
 % c-sdk {
 #include "hardware/gpio.h"
 void ports_program_init(PIO pio, uint sm, uint offset) {
-    for (int i = 15; i <= 30; i++) {
+    for (int i = 18; i <= 33; i++) {
         gpio_init(i);
         gpio_set_dir(i, GPIO_IN);
     }
 
     pio_sm_config c = ports_program_get_default_config(offset);
-    sm_config_set_in_pins(&c, 15);
+    sm_config_set_in_pins(&c, 18);
     sm_config_set_in_shift(&c, true, true, 8);
-    sm_config_set_out_pins(&c, 15, 8);
+    sm_config_set_out_pins(&c, 18, 8);
     sm_config_set_out_shift(&c, true, false, 8);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
     pio_sm_init(pio, sm, offset, &c);

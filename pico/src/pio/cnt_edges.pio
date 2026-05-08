@@ -5,14 +5,14 @@
 .program cnt_edges
 
 cnt_loop:
-    wait 0 gpio 31          ; Wait CNT low
-    wait 1 gpio 31          ; Wait CNT rising edge
+    wait 0 gpio 41          ; Wait CNT low
+    wait 1 gpio 41          ; Wait CNT rising edge
     set x, 1                ; Push 1 for rising edge
     push noblock
 
 cnt_fall:
-    wait 1 gpio 31          ; Wait CNT high
-    wait 0 gpio 31          ; Wait CNT falling edge
+    wait 1 gpio 41          ; Wait CNT high
+    wait 0 gpio 41          ; Wait CNT falling edge
     set x, 0                ; Push 0 for falling edge
     push noblock
     jmp cnt_loop
@@ -22,8 +22,8 @@ cnt_fall:
 #include "cnt_edges.pio.h"
 
 void cnt_edges_program_init(PIO pio, uint sm, uint offset) {
-    gpio_init(31);
-    gpio_set_dir(31, GPIO_IN);
+    gpio_init(41);
+    gpio_set_dir(41, GPIO_IN);
 
     pio_sm_config c = cnt_edges_program_get_default_config(offset);
     pio_sm_init(pio, sm, offset, &c);

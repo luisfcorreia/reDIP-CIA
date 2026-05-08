@@ -26,13 +26,13 @@ changed:
 #include "rs_edges.pio.h"
 
 void rs_edges_program_init(PIO pio, uint sm, uint offset) {
-    for (int i = 16; i <= 19; i++) {
+    for (int i = 36; i <= 39; i++) {
         gpio_init(i);
         gpio_set_dir(i, GPIO_IN);
     }
 
     pio_sm_config c = rs_edges_program_get_default_config(offset);
-    sm_config_set_in_pins(&c, 16);
+    sm_config_set_in_pins(&c, 36);
     sm_config_set_in_shift(&c, true, true, 4);
     pio_sm_init(pio, sm, offset, &c);
     pio_sm_set_enabled(pio, sm, true);

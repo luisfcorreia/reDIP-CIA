@@ -4,8 +4,8 @@
 .program bus_capture
 
 capture_loop:
-    wait 0 gpio 16          ; Wait PHI2 low
-    wait 1 gpio 16          ; Wait PHI2 rising edge (data stable here)
+    wait 0 gpio 26          ; Wait PHI2 low
+    wait 1 gpio 26          ; Wait PHI2 rising edge (data stable here)
     in pins, 8              ; Sample DATA0-7 on rising edge
     push noblock
     jmp capture_loop
@@ -15,7 +15,7 @@ capture_loop:
 #include "bus_capture.pio.h"
 
 void bus_capture_program_init(PIO pio, uint sm, uint offset) {
-    for (int i = 0; i < 8; i++) {
+    for (int i = 27; i < 35; i++) {
         gpio_init(i);
         gpio_set_dir(i, GPIO_IN);
     }

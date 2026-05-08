@@ -4,8 +4,8 @@
 .program bus_output
 
 output_loop:
-    wait 1 gpio 16          ; Wait PHI2 high
-    out pins, 8             ; Output data to GPIO0-7
+    wait 1 gpio 26          ; Wait PHI2 high
+    out pins, 8             ; Output data to GPIO27-34
     jmp output_loop
 
 % c-sdk {
@@ -13,13 +13,13 @@ output_loop:
 #include "bus_output.pio.h"
 
 void bus_output_program_init(PIO pio, uint sm, uint offset) {
-    for (int i = 0; i < 8; i++) {
+    for (int i = 27; i < 35; i++) {
         gpio_init(i);
         gpio_set_dir(i, GPIO_OUT);
     }
 
     pio_sm_config c = bus_output_program_get_default_config(offset);
-    sm_config_set_out_pins(&c, 0, 8);
+    sm_config_set_out_pins(&c, 27, 8);
     sm_config_set_out_shift(&c, true, false, 8);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
     pio_sm_init(pio, sm, offset, &c);

@@ -5,8 +5,8 @@
 .program flag_edges
 
 flag_loop:
-    wait 1 gpio 33          ; Wait FLAG high
-    wait 0 gpio 33          ; Wait FLAG falling edge
+    wait 1 gpio 24          ; Wait FLAG high
+    wait 0 gpio 24          ; Wait FLAG falling edge
     set x, 0                ; Push 0 for falling edge
     push noblock
     jmp flag_loop
@@ -16,8 +16,8 @@ flag_loop:
 #include "flag_edges.pio.h"
 
 void flag_edges_program_init(PIO pio, uint sm, uint offset) {
-    gpio_init(33);
-    gpio_set_dir(33, GPIO_IN);
+    gpio_init(24);
+    gpio_set_dir(24, GPIO_IN);
 
     pio_sm_config c = flag_edges_program_get_default_config(offset);
     pio_sm_init(pio, sm, offset, &c);
