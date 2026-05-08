@@ -5,3 +5,5 @@ fp-info-cache
 *.xml
 *~
 .~*
+pico/build/*
+pico-sdk/*
